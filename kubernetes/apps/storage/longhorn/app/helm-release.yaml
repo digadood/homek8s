@@ -11,12 +11,16 @@ spec:
     spec:
       # renovate: registryUrl=https://charts.longhorn.io
       chart: longhorn
-      version: 1.4.2
+      version: 1.5.0
       sourceRef:
         kind: HelmRepository
         name: longhorn-charts
         namespace: flux-system
       interval: 5m
+  install:
+    createNamespace: true
+    remediation:
+      retries: 3
   values:
     persistence:
       defaultClassReplicaCount: 2
