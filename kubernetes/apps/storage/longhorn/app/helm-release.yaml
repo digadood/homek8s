@@ -22,7 +22,7 @@ spec:
       defaultClassReplicaCount: 2
     defaultSettings:
       defaultReplicaCount: 2
-      defaultLonghornStaticStorageClass: longhorn
+    pspEnable: false
     ingress:
       enabled: true
       ingressClassName: nginx
