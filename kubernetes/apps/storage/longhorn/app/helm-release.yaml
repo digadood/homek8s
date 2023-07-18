@@ -19,22 +19,10 @@ spec:
       interval: 5m
   values:
     persistence:
-      defaultClass: true
-      defaultClassReplicaCount: 1
-      defaultFsType: ext4
-      reclaimPolicy: Delete
+      defaultClassReplicaCount: 2
     defaultSettings:
-      backupstorePollInterval: 300
-     # defaultDataPath: /mnt/usb
-     # backupTarget: nfs://${NAS_ADDR}:/mnt/external/longhorn-backups
-      defaultDataLocality: best-effort
-      defaultReplicaCount: 1
+      defaultReplicaCount: 2
       defaultLonghornStaticStorageClass: longhorn
-      createDefaultDiskLabeledNodes: true
-      nodeDownPodDeletionPolicy: delete-both-statefulset-and-deployment-pod
-      concurrentAutomaticEngineUpgradePerNodeLimit: 1
-      storageMinimalAvailablePercentage: 10
-      StorageOverProvisioningPercentage: 120
     ingress:
       enabled: true
       ingressClassName: nginx
