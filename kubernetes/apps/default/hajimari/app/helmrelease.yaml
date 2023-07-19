@@ -49,6 +49,7 @@ spec:
         ingressClassName: nginx
         annotations:
           hajimari.io/enable: "false"
+          external-dns.alpha.kubernetes.io/target: "ingress.${SECRET_DOMAIN}"
         hosts:
           - host: &host "hajimari.${SECRET_DOMAIN}"
             paths:
