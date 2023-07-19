@@ -19,9 +19,17 @@ spec:
     persistence:
       defaultClassReplicaCount: 2
     defaultSettings:
-#      backupTarget: s3://longhorn-data@dummyregion/
-#      backupTargetCredentialSecret: longhorn-backup-secret
-      defaultReplicaCount: 2
+      defaultReplicaCount: 3
+      # backupTarget: ${NFS_BACKUP}
+      # Below requires that nodes used for storage have the label
+      # node.longhorn.io/create-default-disk=true
+      createDefaultDiskLabeledNodes: true
+      storageOverProvisioningPercentage: 150
+      storageMinimalAvailablePercentage: 50
+      # guaranteedEngineManagerCPU: 20
+      # guaranteedReplicaManagerCPU: 20
+      defaultDataPath: /var/lib/longhorn
+      concurrentAutomaticEngineUpgradePerNodeLimit: 3
       defaultLonghornStaticStorageClass: longhorn
     ingress:
       enabled: true
