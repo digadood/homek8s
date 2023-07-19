@@ -28,23 +28,63 @@ spec:
   dependsOn:
     - name: ingress-nginx
       namespace: networking
-  values:
+values:
     hajimari:
-      title: Apps
-      darkTheme: espresso
-      alwaysTargetBlank: true
-      showGreeting: false
-      showAppGroups: false
-      showAppStatus: false
-      showBookmarkGroups: false
-      showGlobalBookmarks: false
-      showAppUrls: false
       defaultEnable: true
       namespaceSelector:
         matchNames:
           - default
+          - flux-system
+          - games
+          - home
+          - kube-system
+          - networking
+          - media
           - monitoring
-          - longhorn
+          - storage
+      name: "you"
+      # customApps:
+      #   - name: Some External Cluster Service
+      #     url: http://192.168.1.100:5000
+      #     icon: test-tube
+      showGlobalBookmarks: true
+      globalBookmarks:
+        - group: K8S@Home
+          bookmarks:
+            - name: Home Infra Repo
+              url: "https://github.com/Stormcargo/k8s-gitops/"
+            - name: K8S@Home Search
+              url: "https://nanne.dev/k8s-at-home-search/"
+            - name: Template Chart Docs
+              url: "https://github.com/bjw-s/helm-charts/tree/main/charts/library/common"
+            - name: Flux Docs
+              url: "https://fluxcd.io/flux/"
+            - name: Material Design Icons
+              url: "https://pictogrammers.com/library/mdi/"
+        - group: Dev
+          bookmarks:
+            - name: Devdocs
+              url: "https://devdocs.io"
+            - name: Devhints
+              url: "https://devhints.io"
+            - name: ChatGPT
+              url: "https://chat.openai.com/"
+        - group: Media
+          bookmarks:
+            - name: YouTube
+              url: "https://youtube.com/"
+            - name: Guardian
+              url: "https://guardian.co.uk/"
+            - name: Arstechnica
+              url: "https://arstechnica.com/"
+        - group: Tech
+          bookmarks:
+            - name: Hacker News
+              url: "https://news.ycombinator.com/"
+            - name: The Verge
+              url: "https://theverge.com/"
+            - name: Arstechnica
+              url: "https://www.arstechnica.com/"
     ingress:
       main:
         enabled: true
