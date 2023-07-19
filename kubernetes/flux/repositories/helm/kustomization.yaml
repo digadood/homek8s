@@ -20,3 +20,4 @@ resources:
   - ./weave-gitops.yaml
   - ./longhorn.yaml
   - ./tyzbit.yaml
+  - ./external-secrets.yaml
