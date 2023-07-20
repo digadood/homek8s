@@ -5,7 +5,7 @@ metadata:
   name: home-assistant
   namespace: default
 spec:
-  interval: 5m
+  interval: 15m
   chart:
     spec:
       chart: app-template
@@ -14,89 +14,81 @@ spec:
         kind: HelmRepository
         name: bjw-s-charts
         namespace: flux-system
+  maxHistory: 3
+  install:
+    createNamespace: true
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      retries: 3
+  uninstall:
+    keepHistory: false
   values:
+    controller:
+      type: statefulset
+      annotations:
+        reloader.stakater.com/auto: "true"
     image:
       repository: ghcr.io/home-assistant/home-assistant
-      tag: 2023.3.5
-      pullPolicy: IfNotPresent
+      tag: 2023.7.2
     env:
-      TZ: "Europe/London"
+      TZ: "Europe/Berlin"
+ #     SECRET_RECORDER_DB_URL:
+ #       valueFrom:
+ #         secretKeyRef:
+ #           name: database-home-assistant-user
+  #          key: POSTGRES_URL
     hostNetwork: true
     dnsPolicy: ClusterFirstWithHostNet
     service:
       main:
-        type: LoadBalancer
-        loadBalancerIP: "${SVC_HASS_IP}"
-        externalTrafficPolicy: Local
         ports:
           http:
             port: 8123
-
     ingress:
       main:
         enabled: true
-        ingressClassName: "nginx"
+        ingressClassName: nginx
         annotations:
-          cert-manager.io/cluster-issuer: "letsencrypt-production"
-          hajimari.io/enable: "true"
-          hajimari.io/appName: "Home"
-          hajimari.io/icon: "mdiHomeAssistant"
+          external-dns.alpha.kubernetes.io/target: ingress.${SECRET_DOMAIN}
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/name: "Home Assistant"
+          gethomepage.dev/group: "Collaboration"
+          gethomepage.dev/icon: "home-assistant"
         hosts:
-          - host: "hass.${SECRET_DOMAIN}"
+          - host: &host hass.${SECRET_DOMAIN}
             paths:
               - path: /
                 pathType: Prefix
         tls:
-        - hosts:
-            - "hass.${SECRET_DOMAIN}"
-          secretName: "hass.${SECRET_DOMAIN}"
-
-    securityContext:
-      # -- (bool) Privileged securityContext may be required if USB devics are accessed directly through the host machine
-      privileged:  false
-    addons:
-      codeserver:
-        enabled: true
-        image:
-          repository: ghcr.io/k8s-at-home/code-server
-          tag: v4.6.0
-        env:
-          TZ: "${TIMEZONE}"
-        git:
-          deployKeySecret: code-server
-        workingDir: "/config"
-        args:
-          - --auth
-          - "none"
-          - --user-data-dir
-          - "/config/.vscode"
-          - --extensions-dir
-          - "/config/.vscode"
-        ingress:
-          enabled: true
-          ingressClassName: "nginx"
-          hosts:
-            - host: "hass-config.${SECRET_DOMAIN}"
-              annotations:
-                cert.manager.io/cluster-issuer: "letsencrypt-production"
-              paths:
-                - path: /
-                  pathType: Prefix
-              secretName: "hass.${SECRET_DOMAIN}"
-          tls:
-            - hosts:
-                - "hass-config.${SECRET_DOMAIN}"
-              secretName: "hass-config.${SECRET_DOMAIN}"
-        volumeMounts:
-          - name: config
-            mountPath: /config
-    resources:
-      requests:
-        cpu: 100m
-        memory: 400Mi
-      limits:
-        memory: 4000Mi
+          - hosts:
+              - *host
+    probes:
+      liveness:
+        enabled: false
+      readiness:
+        enabled: false
+      startup:
+        enabled: false
     persistence:
+      dbus: # needed for Bluetooth
+        enabled: true
+        type: hostPath
+        hostPath: &dbus /run/dbus
+        mountPath: *dbus
       config:
         enabled: true
-        existingClaim: hass-assistant-config
+        storageClass: longhorn
+        existingClaim: home-assistant-config
+        mountPath: /config
+        retain: true
+    resources:
+      requests:
+        cpu: 10m
+        memory: 1250Mi
+      limits:
+        memory: 1250Mi
+    nodeSelector:
+      bluetooth: "true"
