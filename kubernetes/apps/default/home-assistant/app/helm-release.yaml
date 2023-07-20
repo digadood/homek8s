@@ -1,3 +1,7 @@
+# TODO: tag reader - https://www.home-assistant.io/blog/2020/09/15/home-assistant-tags/
+# TODO: floorplan - https://experiencelovelace.github.io/ha-floorplan/docs/quick-start/
+# Resources:
+# - https://github.com/CCOSTAN/Home-AssistantConfig
 ---
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
@@ -12,9 +16,10 @@ spec:
       version: 1.5.1
       sourceRef:
         kind: HelmRepository
-        name: bjw-s-charts
+        name: bjw-s
         namespace: flux-system
-  maxHistory: 3
+      interval: 15m
+  maxHistory: 2
   install:
     createNamespace: true
     remediation:
@@ -26,22 +31,36 @@ spec:
   uninstall:
     keepHistory: false
   values:
-    controller:
-      type: statefulset
-      annotations:
-        reloader.stakater.com/auto: "true"
     image:
-      repository: ghcr.io/home-assistant/home-assistant
-      tag: 2023.7.2
+      repository: lscr.io/linuxserver/homeassistant
+      tag: latest
     env:
-      TZ: "Europe/Berlin"
- #     SECRET_RECORDER_DB_URL:
- #       valueFrom:
- #         secretKeyRef:
- #           name: database-home-assistant-user
-  #          key: POSTGRES_URL
-    hostNetwork: true
-    dnsPolicy: ClusterFirstWithHostNet
+      TZ: "${TIMEZONE}"
+      PUID: "${SECURITY_CONTEXT_RUN_AS_USER}"
+      PGID: "${SECURITY_CONTEXT_RUN_AS_GROUP}"
+    securityContext:
+      # Privileged securityContext may be required if USB devices are accessed directly through the host machine
+      privileged: true
+      # capabilities:
+      #   add: ["CAP_NET_RAW", "CAP_NET_BIND_SERVICE"]
+    persistence:
+      data:
+        enabled: true
+        existingClaim: home-assistant-config
+        mountPath: /config
+        subPath: homeassistant
+      zwave:
+        enabled: true
+        type: hostPath
+        # mountPath: /dev/zwave
+        mountPath: /dev/ttyUSB0
+        hostPath: /dev/serial/by-id/${DEVICE_ID_ZWAVE}
+      zigbee:
+        enabled: true
+        type: hostPath
+        # mountPath: /dev/zigbee
+        mountPath: /dev/ttyUSB1
+        hostPath: /dev/serial/by-id/${DEVICE_ID_ZIGBEE}
     service:
       main:
         ports:
@@ -52,43 +71,16 @@ spec:
         enabled: true
         ingressClassName: nginx
         annotations:
-          external-dns.alpha.kubernetes.io/target: ingress.${SECRET_DOMAIN}
-          gethomepage.dev/enabled: "true"
-          gethomepage.dev/name: "Home Assistant"
-          gethomepage.dev/group: "Collaboration"
-          gethomepage.dev/icon: "home-assistant"
+          external-dns.home.arpa/enabled: "true"
+          forecastle.stakater.com/expose: "true"
+          forecastle.stakater.com/icon: home-assistant
         hosts:
-          - host: &host hass.${SECRET_DOMAIN}
+          - host: &host "home.${PUBLIC_DOMAIN}"
             paths:
               - path: /
                 pathType: Prefix
         tls:
           - hosts:
               - *host
-    probes:
-      liveness:
-        enabled: false
-      readiness:
-        enabled: false
-      startup:
-        enabled: false
-    persistence:
-      dbus: # needed for Bluetooth
-        enabled: true
-        type: hostPath
-        hostPath: &dbus /run/dbus
-        mountPath: *dbus
-      config:
-        enabled: true
-        storageClass: longhorn
-        existingClaim: home-assistant-config
-        mountPath: /config
-        retain: true
-    resources:
-      requests:
-        cpu: 10m
-        memory: 1250Mi
-      limits:
-        memory: 1250Mi
     nodeSelector:
-      bluetooth: "true"
+      feature.node.kubernetes.io/custom-zwave: "true"
