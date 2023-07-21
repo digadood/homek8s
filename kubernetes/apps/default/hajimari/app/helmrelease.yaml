@@ -43,6 +43,10 @@ spec:
       namespaceSelector:
         matchNames:
           - default
+          - home
+          - monitoring
+          - networking
+          - databases
     ingress:
       main:
         enabled: true
