@@ -5,3 +5,4 @@ resources:
   - helmrelease.yaml
   - config-pvc.yaml
   - externalsecret.yaml
+  - external-secrets.yaml
