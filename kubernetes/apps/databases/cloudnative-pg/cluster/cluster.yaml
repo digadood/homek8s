@@ -19,20 +19,20 @@ spec:
   superuserSecret:
     name: cloudnative-pg-secret
 
-  bootstrap:
-    initdb:
-      database: app
-      owner: app
-      secret:
-        name: app-secret
+  #bootstrap:
+    #initdb:
+   #   database: app
+  #    owner: app
+ #     secret:
+#        name: app-secret
 
- # postgresql:
- #   parameters:
- #     max_connections: "600"
- #     shared_buffers: 512MB
+  postgresql:
+    parameters:
+      max_connections: "600"
+      shared_buffers: 512MB
 
-#  monitoring:
-#    enablePodMonitor: true
+  monitoring:
+    enablePodMonitor: true
 #
 #  backup:
 #    retentionPolicy: 30d
