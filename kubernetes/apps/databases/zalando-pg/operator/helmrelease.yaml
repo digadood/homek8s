@@ -22,7 +22,7 @@ spec:
       major_version_upgrade_mode: full
 
     configKubernetes:
-      enable_pod_antiaffinity: true
+      enable_pod_antiaffinity: false
       enable_cross_namespace_secret: true
       # pod_environment_configmap: "postgres-pod-config"
       watched_namespace: "*"
