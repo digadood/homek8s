@@ -8,7 +8,7 @@ spec:
   teamId: "sc"
   volume:
     size: 30Gi
-  numberOfInstances: 3
+  numberOfInstances: 1
   users:
     postgres: # database owner
       - superuser
