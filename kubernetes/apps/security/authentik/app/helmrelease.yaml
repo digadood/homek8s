@@ -166,7 +166,7 @@ spec:
         create: true
 
     geoip:
-      enabled: true
+      enabled: false
       ##accountId: ""
       ##licenseKey: ""
 
