@@ -1,0 +1,80 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: &app home-assistant
+  namespace: home
+spec:
+  interval: 15m
+  chart:
+    spec:
+      chart: app-template
+      version: 1.5.1
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s-charts
+        namespace: flux-system
+  install:
+    createNamespace: true
+    remediation:
+      retries: 5
+  upgrade:
+    remediation:
+      retries: 5
+  values:
+    controller:
+      type: statefulset
+    image:
+      repository: ghcr.io/onedr0p/home-assistant
+      tag: 2023.7.1@sha256:53a01ba5ee421bc6ba3ab89d63ba20d40cb6684cb2230000cf72f524d262ba82
+    env:
+      TZ: "${TIMEZONE}"
+    service:
+      main:
+        type: LoadBalancer
+        externalIPs: ["${LB_HOME_ASSISTANT_IP}"]
+        externalTrafficPolicy: Local
+        ports:
+          http:
+            port: 8123
+    ingress:
+      main:
+        annotations:
+          hajimari.io/enable: "true"
+          hajimari.io/icon: "home-assistant"
+          cert-manager.io/cluster-issuer: "letsencrypt-production"
+        enabled: true
+        ingressClassName: "nginx"
+        hosts:
+        - host: "ha.${SECRET_DOMAIN}"
+          paths:
+          - path: /
+            pathType: Prefix
+        tls:
+        - hosts:
+          - "ha.${SECRET_DOMAIN}"
+          secretName: "ha-tls"
+    probes:
+      liveness:
+        enabled: false
+      readiness:
+        enabled: false
+      startup:
+        enabled: false
+    podSecurityContext:
+      runAsUser: 568
+      runAsGroup: 568
+      fsGroup: 568
+      fsGroupChangePolicy: "OnRootMismatch"
+      supplementalGroups:
+      - 100
+    persistence:
+      config:
+        enabled: true
+        existingClaim: hass-local-data
+    resources:
+      requests:
+        cpu: 10m
+        memory: 100Mi
+      limits:
+        memory: 750Mi
