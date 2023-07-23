@@ -202,11 +202,3 @@ spec:
       name: authentik-secret
       valuesKey: host
       targetPath: authentik.postgresql.host
-    - kind: Secret
-      name: authentik-secret
-      valuesKey: account_id
-      targetPath: geoip.accountId
-    - kind: Secret
-      name: authentik-secret
-      valuesKey: license_key
-      targetPath: geoip.licenseKey
