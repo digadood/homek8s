@@ -3,16 +3,24 @@ apiVersion: "acid.zalan.do/v1"
 kind: postgresql
 metadata:
   name: postgres
-  namespace: databases
+  namespace: database
 spec:
-  teamId: "test"
+  teamId: "testing"
+
   volume:
+    storageClass: local-hostpath
     size: 30Gi
-  numberOfInstances: 1
+
+  numberOfInstances: 3
+
   users:
     postgres: # database owner
       - superuser
       - createdb
+
+  postgresql:
+    version: "15"
+
   # Restore procedure:
   # - Remove the existing cluster
   # - Uncomment the "clone" section below to restore a point in time backup
@@ -21,5 +29,3 @@ spec:
   # clone:
   #   cluster: "postgres"  # The source cluster name
   #   timestamp: "2023-03-21T19:50:00+00:00"  # timezone required (offset relative to UTC, see RFC 3339 section 5.6)
-  postgresql:
-    version: "15"
