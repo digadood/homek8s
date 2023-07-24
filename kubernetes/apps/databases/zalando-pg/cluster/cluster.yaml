@@ -5,7 +5,7 @@ metadata:
   name: postgres
   namespace: databases
 spec:
-  teamId: "sc"
+  teamId: "test"
   volume:
     size: 30Gi
   numberOfInstances: 1
