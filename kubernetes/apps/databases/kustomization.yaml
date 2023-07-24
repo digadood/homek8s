@@ -5,3 +5,4 @@ resources:
   - ./namespace.yaml
 #  - ./cloudnative-pg/ks.yaml
   - ./zalando-pg/ks.yaml
+  - ./ext-postgres-operator/ks.yaml
