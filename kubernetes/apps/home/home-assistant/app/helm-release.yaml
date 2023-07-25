@@ -2,10 +2,10 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
-  name: &app home-assistant
+  name: home-assistant
   namespace: home
 spec:
-  interval: 15m
+  interval: 30m
   chart:
     spec:
       chart: app-template
@@ -14,46 +14,51 @@ spec:
         kind: HelmRepository
         name: bjw-s
         namespace: flux-system
+  maxHistory: 3
   install:
-    createNamespace: true
     remediation:
-      retries: 5
+      retries: 3
   upgrade:
+    cleanupOnFail: true
     remediation:
-      retries: 5
+      retries: 3
+  uninstall:
+    keepHistory: false
   values:
     controller:
       type: statefulset
     image:
       repository: ghcr.io/onedr0p/home-assistant
-      tag: 2023.7.1@sha256:53a01ba5ee421bc6ba3ab89d63ba20d40cb6684cb2230000cf72f524d262ba82
+      tag: 2023.7.3@sha256:ef2682a81e3e6752b9206a7eac151a841000e6c47cc04c3d71990081d2c7b1bf
     env:
-      TZ: "${TIMEZONE}"
+      TZ: ${TIMEZONE}
     service:
       main:
         type: LoadBalancer
-        externalIPs: "192.168.3.241"
-        externalTrafficPolicy: Local
+        annotations:
+          io.cilium/lb-ipam-ips: "192.168.3.55"
+        externalTrafficPolicy: Cluster
         ports:
           http:
             port: 8123
     ingress:
       main:
-        annotations:
-          hajimari.io/enable: "true"
-          hajimari.io/icon: "home-assistant"
-          cert-manager.io/cluster-issuer: "letsencrypt-production"
         enabled: true
-        ingressClassName: "nginx"
+        ingressClassName: nginx
+        annotations:
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: Home
+          gethomepage.dev/name: Home-Assistant
+          gethomepage.dev/icon: home-assistant.png
+          external-dns.alpha.kubernetes.io/target: "ingress.${SECRET_DOMAIN}"
         hosts:
-        - host: "ha.${SECRET_DOMAIN}"
-          paths:
-          - path: /
-            pathType: Prefix
+          - host: &host "hass.${SECRET_DOMAIN}"
+            paths:
+              - path: /
+                pathType: Prefix
         tls:
-        - hosts:
-          - "ha.${SECRET_DOMAIN}"
-          secretName: "ha-tls"
+          - hosts:
+              - *host
     probes:
       liveness:
         enabled: false
@@ -65,16 +70,16 @@ spec:
       runAsUser: 568
       runAsGroup: 568
       fsGroup: 568
-      fsGroupChangePolicy: "OnRootMismatch"
-      supplementalGroups:
-      - 100
-    persistence:
-      config:
-        enabled: true
-        existingClaim: hass-local-data
+      fsGroupChangePolicy: OnRootMismatch
+    volumeClaimTemplates:
+      - name: config
+        mountPath: /config
+        accessMode: ReadWriteOnce
+        size: 5Gi
+        storageClass: longhorn-config
     resources:
       requests:
-        cpu: 10m
-        memory: 100Mi
+        cpu: 50m
+        memory: 400M
       limits:
-        memory: 750Mi
+        memory: 700M
