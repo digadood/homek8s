@@ -76,7 +76,7 @@ spec:
         mountPath: /config
         accessMode: ReadWriteOnce
         size: 5Gi
-        storageClass: longhorn-config
+        storageClass: local-hostpath
     resources:
       requests:
         cpu: 50m
