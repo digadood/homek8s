@@ -37,25 +37,30 @@ spec:
         ports:
           http:
             port: 8123
+          mdns-tcp:
+            enabled: true
+            port: 5353
+            protocol: TCP
+            targetPort: 5353
+          mdns-udp:
+            enabled: true
+            port: 5353
+            protocol: UDP
+            targetPort: 5353
     ingress:
       main:
         enabled: true
-        ingressClassName: nginx
+        ingressClassName: "nginx"
         annotations:
-          gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: Home
-          gethomepage.dev/name: Home-Assistant
-          gethomepage.dev/icon: home-assistant.png
-          external-dns.alpha.kubernetes.io/target: "ingress.${SECRET_DOMAIN}"
           nginx.ingress.kubernetes.io/whitelist-source-range: "10.0.0.0/8,172.16.0.0/12,192.168.0.0/16"
         hosts:
-          - host: "hass.${SECRET_DOMAIN}"
+          - host: &host hass.${SECRET_DOMAIN}
             paths:
               - path: /
                 pathType: Prefix
         tls:
           - hosts:
-              - "hass-tls"
+              - *host
     probes:
       liveness:
         enabled: false
