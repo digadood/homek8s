@@ -105,11 +105,19 @@ spec:
     #  - configMapRef:
     #      name: special-config
 
-    envValueFrom: {}
-    #  AUTHENTIK_VAR_NAME:
-    #    secretKeyRef:
-    #      key: password
-    #      name: my-secret
+    envValueFrom:
+      AUTHENTIK_POSTGRESQL__NAME:
+        secretKeyRef:
+          name: authentik-secret
+          key: database_name
+      AUTHENTIK_POSTGRESQL__USER:
+        secretKeyRef:
+          name: authentik-secret
+          key:  postgresql_user
+      AUTHENTIK_POSTGRESQL__PASSWORD:
+        secretKeyRef:
+          name: authentik-secret
+          key: postgresql_password
 
     service:
       enabled: true
