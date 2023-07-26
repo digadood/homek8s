@@ -5,7 +5,7 @@ namespace: home
 resources:
   - ./helm-release.yaml
 patchesStrategicMerge:
-  - ./patches/addons.yaml
+#  - ./patches/addons.yaml
 labels:
   - pairs:
       app.kubernetes.io/name: home-assistant
