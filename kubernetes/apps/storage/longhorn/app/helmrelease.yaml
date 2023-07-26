@@ -31,17 +31,45 @@ spec:
       defaultDataPath: /var/lib/longhorn
       concurrentAutomaticEngineUpgradePerNodeLimit: 3
       defaultLonghornStaticStorageClass: longhorn
-    ingress:
-      enabled: true
-      ingressClassName: nginx
-      host: "longhorn.${SECRET_DOMAIN}"
-      tls: true
-      tlsSecret: "longhorn-tls"
-      path: /
-      annotations:
-        cert-manager.io/cluster-issuer: "letsencrypt-production"
-        nginx.ingress.kubernetes.io/whitelist-source-range: "10.0.0.0/8,172.16.0.0/12,192.168.0.0/16"
-        hajimari.io/icon: "cow"
-        hajimari.io/appName: "Longhorn"
-        hajimari.io/enable: "true"
-        hajimari.io/info: "Storage"
+#    ingress:
+#      enabled: true
+#      ingressClassName: nginx
+#      host: "longhorn.${SECRET_DOMAIN}"
+#      tls: true
+#      tlsSecret: "longhorn-tls"
+#      path: /
+#      annotations:
+#        cert-manager.io/cluster-issuer: "letsencrypt-production"
+#        nginx.ingress.kubernetes.io/whitelist-source-range: "10.0.0.0/8,172.16.0.0/12,192.168.0.0/16"
+#        hajimari.io/icon: "cow"
+#        hajimari.io/appName: "Longhorn"
+#        hajimari.io/enable: "true"
+#        hajimari.io/info: "Storage"
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: longhorn-oauth2-proxy
+  namespace: storage
+spec:
+  targetNamespace: storage
+  releaseName: longhorn-oauth2-proxy
+  chart:
+    spec:
+      chart: oauth2-proxy
+      version: "6.16.1"
+      sourceRef:
+        kind: HelmRepository
+        name: oauth2-proxy
+        namespace: flux-system
+  interval: 2m0s
+  values:
+    replicaCount: 1
+    extraArgs:
+      provider: github
+      github-org: "${blog_name}"
+      github-team: "super-admins,longhorn"
+      cookie-expire: 168h0m0s
+      scope: "user:email"
+    config:
+      existingSecret: longhorn-oauth2-proxy
