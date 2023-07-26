@@ -25,3 +25,4 @@ resources:
   - ./external-secrets.yaml
   - ./zalando-postgres-operator.yaml
   - ./ext-postgres-operator.yaml
+  - ./oauth2-proxy.yaml
