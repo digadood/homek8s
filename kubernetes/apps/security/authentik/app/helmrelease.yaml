@@ -63,62 +63,54 @@ spec:
         - hosts:
             - *host
 
-    podAnnotations: {}
+    envFrom:
+      - secretRef:
+          name: authentik-secret
 
     authentik:
-      # -- Log level for server and worker
-      log_level: info
+      log_level: debug
+      secret_key: "${AUTHENTIK_SECRET_KEY}"
+      email:
+        host: "${SMTP_HOST}"
+        port: "${SMTP_PORT}"
+        username: "${SMTP_USER}"
+        password: "${SMTP_PASS}"
+        use_tls: true
+        from: "${SMTP_FROM}"
       error_reporting:
         enabled: false
-      # -- Secret key used for cookie singing and unique user IDs,
-      # don't change this after the first install
-      ##secret_key: ""
-      # -- Path for the geoip database. If the file doesn't exist, GeoIP features are disabled.
-      geoip: /geoip/GeoLite2-City.mmdb
-      # -- Mode for the avatars. Defaults to gravatar. Possible options 'gravatar' and 'none'
-      avatars: gravatar
-      email:
-        ##host: ""
-        use_tls: true
-        ##from: ""
-      outposts:
-        container_image_base: ghcr.io/goauthentik/%(type)s:%(version)s
+        send_pii: false
       postgresql:
-        ##host: '{{ .Release.Name }}-postgresql'
-        ##name: "authentik"
-        ##user: "authentik"
-        ##password: ""
+        host: "${POSTGRES_HOST}"
         port: 5432
-      redis:
-        host: '{{ .Release.Name }}-redis-master'
-        #password: ""
-
-    # -- List of config maps to mount blueprints from. Only keys in the
-    # configmap ending with ".yaml" wil be discovered and applied
-    blueprints: []
-
-    # -- see configuration options at https://goauthentik.io/docs/installation/configuration/
-    env: {}
-    # AUTHENTIK_VAR_NAME: VALUE
-
-    envFrom: []
-    #  - configMapRef:
-    #      name: special-config
+        name: ""
+        user: ""
+        password: ""
+      outposts:
+        docker_image_base: ghcr.io/goauthentik/%(type)s:%(version)s
 
     envValueFrom:
+      AUTHENTIK_POSTGRESQL__HOST:
+        secretKeyRef:
+          name: authentik-secret
+          key: POSTGRES_HOST
       AUTHENTIK_POSTGRESQL__NAME:
         secretKeyRef:
           name: authentik-secret
-          key: database_name
+          key: POSTGRES_DB
       AUTHENTIK_POSTGRESQL__USER:
         secretKeyRef:
           name: authentik-secret
-          key:  postgresql_user
+          key: POSTGRES_USER
       AUTHENTIK_POSTGRESQL__PASSWORD:
         secretKeyRef:
           name: authentik-secret
-          key: postgresql_password
+          key: POSTGRES_PASS
 
+    postgresql:
+      enabled: false
+    redis:
+      enabled: true
     service:
       enabled: true
       type: ClusterIP
@@ -178,9 +170,6 @@ spec:
       ##accountId: ""
       ##licenseKey: ""
 
-    redis:
-      enabled: true
-    #mapped values from secrets
   valuesFrom:
     - kind: Secret
       name: authentik-secret
