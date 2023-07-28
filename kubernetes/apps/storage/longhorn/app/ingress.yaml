@@ -29,28 +29,28 @@ spec:
                 port:
                   number: 80
 ---
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: longhorn-oauth2-proxy
-  namespace: longhorn-system
-  annotations:
-    kubernetes.io/ingress.class: nginx
-    cert-manager.io/cluster-issuer: letsencrypt
-    external-dns.alpha.kubernetes.io/exclude: "true"
-spec:
-  tls:
-    - hosts:
-        - &host "longhorn.${SECRET_DOMAIN}"
-      secretName: *host
-  rules:
-    - host: *host
-      http:
-        paths:
-          - path: /oauth2
-            pathType: Prefix
-            backend:
-              service:
-                name: longhorn-oauth2-proxy
-                port:
-                  number: 80
+#apiVersion: networking.k8s.io/v1
+#kind: Ingress
+#metadata:
+#  name: longhorn-oauth2-proxy
+#  namespace: longhorn-system
+#  annotations:
+#    kubernetes.io/ingress.class: nginx
+#    cert-manager.io/cluster-issuer: letsencrypt
+#    external-dns.alpha.kubernetes.io/exclude: "true"
+#spec:
+#  tls:
+#    - hosts:
+#        - &host "longhorn.${SECRET_DOMAIN}"
+#      secretName: *host
+#  rules:
+#    - host: *host
+#      http:
+#        paths:
+#          - path: /oauth2
+#            pathType: Prefix
+#            backend:
+#              service:
+#                name: longhorn-oauth2-proxy
+#                port:
+#                  number: 80
